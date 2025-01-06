@@ -1,6 +1,6 @@
 # Weather App
 
-A modern weather application built with React, TypeScript, and Material-UI that provides real-time weather information, forecasts, and air quality data.
+A modern weather application built with React, TypeScript, and Material-UI that provides real-time weather information, forecasts, map...
 
 ## Prerequisites
 
@@ -54,17 +54,6 @@ npm install
 node server.js
 ```
 
-## Features
-
-- Real-time weather updates
-- 5-day weather forecast
-- Air quality information
-- Interactive weather map
-- Multiple city support
-- Responsive design
-- Dark/Light theme
-- Internationalization support
-
 ## Technologies
 
 - React
@@ -75,6 +64,3 @@ node server.js
 - Vite
 - i18next
 
-## License
-
-MIT
