@@ -1,0 +1,128 @@
+{
+  "en": {
+    "translation": {
+      "welcome": "Welcome",
+      "language": "Language",
+      "search": "Filter city",
+      "currentWeather": {
+        "title": "Current Weather",
+        "feelsLike": "Feels like"
+      },
+      "weatherDetails": {
+        "title": "Weather Details",
+        "humidity": "Humidity",
+        "pressure": "Pressure",
+        "windSpeed": "Wind Speed",
+        "windDirection": "Wind Direction"
+      },
+      "airQuality": {
+        "title": "Air Quality",
+        "level": {
+          "good": "Good",
+          "fair": "Fair",
+          "moderate": "Moderate",
+          "poor": "Poor",
+          "veryPoor": "Very Poor",
+          "unknown": "Unknown"
+        }
+      },
+      "sunTimes": {
+        "title": "Sun Times",
+        "sunrise": "Sunrise",
+        "sunset": "Sunset"
+      },
+      "addCity": {
+        "button": "Add City",
+        "title": "Add new city",
+        "searchPlaceholder": "Search city",
+        "searchButton": "Search",
+        "noResults": "No cities found",
+        "searching": "Searching...",
+        "alreadyAdded": "This city is already added",
+        "successfullyAdded": "City successfully added"
+      },
+      "navigation": {
+        "dashboard": "Dashboard",
+        "location": "Location"
+      },
+      "forecast": {
+        "title": "5-Day Forecast"
+      },
+      "weatherMap": {
+        "title": "Weather Map",
+        "temperature": "Temperature",
+        "clouds": "Clouds",
+        "precipitation": "Precipitation"
+      },
+      "error": {
+        "title": "Oops! Something went wrong",
+        "message": "An unexpected error occurred",
+        "tryAgain": "Try Again",
+        "goToDashboard": "Go to Dashboard"
+      }
+    }
+  },
+  "sl": {
+    "translation": {
+      "welcome": "Dobrodošli",
+      "language": "Jezik",
+      "search": "Filtriraj mesto",
+      "currentWeather": {
+        "title": "Trenutno vreme",
+        "feelsLike": "Občutek"
+      },
+      "weatherDetails": {
+        "title": "Podrobnosti vremena",
+        "humidity": "Vlažnost",
+        "pressure": "Pritisk",
+        "windSpeed": "Hitrost vetra",
+        "windDirection": "Smer vetra"
+      },
+      "airQuality": {
+        "title": "Kakovost zraka",
+        "level": {
+          "good": "Dobra",
+          "fair": "Zadovoljiva",
+          "moderate": "Zmerna",
+          "poor": "Slaba",
+          "veryPoor": "Zelo slaba",
+          "unknown": "Neznano"
+        }
+      },
+      "sunTimes": {
+        "title": "Sončni časi",
+        "sunrise": "Sončni vzhod",
+        "sunset": "Sončni zahod"
+      },
+      "addCity": {
+        "button": "Dodaj mesto",
+        "title": "Dodaj novo mesto",
+        "searchPlaceholder": "Išči mesto",
+        "searchButton": "Išči",
+        "noResults": "Ni najdenih mest",
+        "searching": "Iskanje...",
+        "alreadyAdded": "To mesto je že dodano",
+        "successfullyAdded": "Mesto je uspešno dodano"
+      },
+      "navigation": {
+        "dashboard": "Nadzorna plošča",
+        "location": "Lokacija"
+      },
+      "forecast": {
+        "title": "5-Dnevna Napoved"
+      },
+      "weatherMap": {
+        "title": "Vremenska karta",
+        "temperature": "Temperatura",
+        "clouds": "Oblaki",
+        "precipitation": "Padavine"
+      },
+      "error": {
+        "title": "Ups! Nekaj je šlo narobe",
+        "message": "Prišlo je do nepričakovane napake",
+        "tryAgain": "Poskusi znova",
+        "goToDashboard": "Pojdi na nadzorno ploščo"
+      }
+    }
+  }
+}

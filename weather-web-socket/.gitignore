@@ -1,0 +1,38 @@
+# Dependency directories
+node_modules/
+
+# Production build files
+dist/
+
+# Local environment files
+.env
+.env.local
+.env.*.local
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# IDE/Editor settings
+.vscode/
+.idea/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Cache and output files
+.cache/
+*.log
+*.out
+
+# Vite specific
+.vite/
+
+# TypeScript
+*.tsbuildinfo
+
+# Optional: Testing
+coverage/
