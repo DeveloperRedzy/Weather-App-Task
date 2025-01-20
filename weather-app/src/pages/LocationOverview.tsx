@@ -1,72 +1,55 @@
 import { FC, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { Grid2, IconButton, Box, Typography } from '@mui/material';
+import { ArrowBack as ArrowBackIcon } from '@mui/icons-material';
+import { useAppDispatch } from '../store/hooks';
 import {
-  Box,
-  IconButton,
-  Typography,
-  Grid2,
-  CircularProgress,
-} from '@mui/material';
-import { ArrowBack } from '@mui/icons-material';
-import { useAppSelector } from '../store/hooks';
-import { useWeatherWebSocket } from '../hooks/useWeatherWebSocket';
-import { CurrentWeatherCard } from '../components/CurrentWeatherCard';
+  fetchLocationDetails,
+  fetchWeatherForLocation,
+} from '../store/features/weatherSlice';
 import { WeatherDetailsCard } from '../components/WeatherDetailsCard';
-import { SunTimesCard } from '../components/SunTimesCard';
-import { AirQualityCard } from '../components/AirQualityCard';
-import { ForecastCard } from '../components/ForecastCard';
 import { WeatherMapCard } from '../components/WeatherMapCard';
+import { ForecastCard } from '../components/ForecastCard';
+import { AirQualityCard } from '../components/AirQualityCard';
+import { CurrentWeatherCard } from '../components/CurrentWeatherCard';
+import { SunTimesCard } from '../components/SunTimesCard';
+import { useWeather } from '../contexts/WeatherContext';
 
 type MapLayer = 'clouds' | 'precipitation' | 'temp';
 
 const LocationOverview: FC = () => {
   const { locationId } = useParams<{ locationId: string }>();
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const [selectedMapLayer, setSelectedMapLayer] = useState<MapLayer>('temp');
+  const { weatherData, forecastData, airQualityData } = useWeather();
 
-  const weatherData = useAppSelector((state) =>
-    state.weather.weatherData.find(
-      (city) => `${city.coord.lat}:${city.coord.lon}` === locationId
-    )
-  );
-  const forecastData = useAppSelector((state) => state.weather.forecastData);
-  const airQualityData = useAppSelector(
-    (state) => state.weather.airQualityData
-  );
-  const connectionStatus = useAppSelector(
-    (state) => state.weather.connectionStatus
-  );
+  useEffect(() => {
+    if (!locationId) {
+      navigate('/dashboard');
+    }
+  }, [locationId, navigate]);
 
-  const { selectLocation } = useWeatherWebSocket();
+  const currentLocationWeather = locationId
+    ? weatherData.find((data) => {
+        const [lat, lon] = locationId.split(':').map(Number);
+        return data.coord.lat === lat && data.coord.lon === lon;
+      })
+    : undefined;
 
   useEffect(() => {
     if (locationId) {
-      selectLocation(locationId);
+      dispatch(fetchWeatherForLocation(locationId));
+      dispatch(fetchLocationDetails(locationId));
     }
-    return () => {
-      selectLocation(null);
-    };
-  }, [locationId, selectLocation]);
-
-  if (connectionStatus === 'connecting' || !weatherData) {
-    return (
-      <Box
-        display='flex'
-        justifyContent='center'
-        alignItems='center'
-        height='100vh'
-      >
-        <CircularProgress />
-      </Box>
-    );
-  }
+  }, [dispatch, locationId]);
 
   const handleBack = () => {
     navigate('/dashboard');
   };
 
   const handleMapLayerChange = (
-    _event: React.MouseEvent<HTMLElement>,
+    _: React.MouseEvent<HTMLElement>,
     newLayer: MapLayer
   ) => {
     if (newLayer !== null) {
@@ -74,46 +57,56 @@ const LocationOverview: FC = () => {
     }
   };
 
+  if (!locationId) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Typography>No location specified</Typography>
+      </Box>
+    );
+  }
+
+  if (!currentLocationWeather) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Typography>Loading...</Typography>
+      </Box>
+    );
+  }
+
   return (
-    <Box sx={{ p: { xs: 1, sm: 2, md: 3 } }}>
-      <Box
-        sx={{ mb: 3, display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}
-      >
+    <Box sx={{ p: 3 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
         <IconButton onClick={handleBack} sx={{ mr: 2 }}>
-          <ArrowBack />
+          <ArrowBackIcon />
         </IconButton>
-        <Typography
-          variant='h4'
-          sx={{ fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' } }}
-        >
-          {weatherData.name}
+        <Typography variant='h4' component='h1'>
+          {currentLocationWeather.name}
         </Typography>
       </Box>
 
-      <Grid2 container spacing={{ xs: 2, md: 3 }}>
+      <Grid2 container spacing={3}>
         <Grid2 size={{ xs: 12, md: 6 }}>
-          <CurrentWeatherCard weatherData={weatherData} />
+          <CurrentWeatherCard />
         </Grid2>
-
         <Grid2 size={{ xs: 12, md: 6 }}>
-          <WeatherDetailsCard weatherData={weatherData} />
+          <WeatherDetailsCard />
         </Grid2>
-
-        <Grid2 size={{ xs: 12, md: 6 }}>
-          <SunTimesCard weatherData={weatherData} />
-        </Grid2>
-
-        <Grid2 size={{ xs: 12, md: 6 }}>
-          {airQualityData && <AirQualityCard data={airQualityData} />}
-        </Grid2>
-
         <Grid2 size={{ xs: 12 }}>
-          <ForecastCard forecastData={forecastData} />
+          <SunTimesCard />
         </Grid2>
-
+        {airQualityData && (
+          <Grid2 size={{ xs: 12 }}>
+            <AirQualityCard />
+          </Grid2>
+        )}
+        {forecastData && (
+          <Grid2 size={{ xs: 12 }}>
+            <ForecastCard />
+          </Grid2>
+        )}
         <Grid2 size={{ xs: 12 }}>
           <WeatherMapCard
-            center={[weatherData.coord.lat, weatherData.coord.lon]}
+            location={locationId}
             selectedMapLayer={selectedMapLayer}
             onMapLayerChange={handleMapLayerChange}
           />

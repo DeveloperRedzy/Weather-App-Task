@@ -1,30 +1,9 @@
 import { FC } from 'react';
-import { Box, Typography, LinearProgress } from '@mui/material';
-import { AirQualityData } from '../store/features/weatherSlice';
+import { Card, CardContent, Typography, Box, Chip } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import { useWeather } from '../contexts/WeatherContext';
 
-interface AirQualityCardProps {
-  data: AirQualityData;
-}
-
-const getAQIColor = (aqi: number) => {
-  switch (aqi) {
-    case 1:
-      return '#4CAF50'; // Good - Green
-    case 2:
-      return '#8BC34A'; // Fair - Light Green
-    case 3:
-      return '#FFC107'; // Moderate - Yellow
-    case 4:
-      return '#FF5722'; // Poor - Orange
-    case 5:
-      return '#F44336'; // Very Poor - Red
-    default:
-      return '#9E9E9E';
-  }
-};
-
-const getAQILabel = (aqi: number, t: (key: string) => string) => {
+const getAqiLabel = (aqi: number, t: (key: string) => string): string => {
   switch (aqi) {
     case 1:
       return t('airQuality.level.good');
@@ -41,33 +20,71 @@ const getAQILabel = (aqi: number, t: (key: string) => string) => {
   }
 };
 
-export const AirQualityCard: FC<AirQualityCardProps> = ({ data }) => {
+const getAqiColor = (aqi: number): string => {
+  switch (aqi) {
+    case 1:
+      return '#4caf50';
+    case 2:
+      return '#8bc34a';
+    case 3:
+      return '#ffc107';
+    case 4:
+      return '#ff9800';
+    case 5:
+      return '#f44336';
+    default:
+      return '#9e9e9e';
+  }
+};
+
+export const AirQualityCard: FC = () => {
   const { t } = useTranslation();
-  const airQuality = data.list[0];
-  const aqi = airQuality.main.aqi;
-  //const components = airQuality.components;
+  const { airQualityData } = useWeather();
+
+  if (!airQualityData) return null;
+
+  const aqi = airQualityData.list[0].main.aqi;
+  const components = airQualityData.list[0].components;
+
   return (
-    <Box>
-      <Box sx={{ mb: 3, textAlign: 'center' }}>
+    <Card>
+      <CardContent>
         <Typography variant='h6' gutterBottom>
           {t('airQuality.title')}
         </Typography>
-        <Typography variant='h4' gutterBottom>
-          {getAQILabel(aqi, t)}
-        </Typography>
-        <LinearProgress
-          variant='determinate'
-          value={(aqi / 5) * 100}
-          sx={{
-            height: 10,
-            borderRadius: 5,
-            backgroundColor: '#e0e0e0',
-            '& .MuiLinearProgress-bar': {
-              backgroundColor: getAQIColor(aqi),
-            },
-          }}
-        />
-      </Box>
-    </Box>
+
+        <Box sx={{ mb: 2 }}>
+          <Chip
+            label={getAqiLabel(aqi, t)}
+            sx={{
+              bgcolor: getAqiColor(aqi),
+              color: 'white',
+              fontWeight: 'bold',
+            }}
+          />
+        </Box>
+
+        <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+          <Typography variant='body2'>
+            CO: {components.co.toFixed(1)} μg/m³
+          </Typography>
+          <Typography variant='body2'>
+            NO₂: {components.no2.toFixed(1)} μg/m³
+          </Typography>
+          <Typography variant='body2'>
+            O₃: {components.o3.toFixed(1)} μg/m³
+          </Typography>
+          <Typography variant='body2'>
+            SO₂: {components.so2.toFixed(1)} μg/m³
+          </Typography>
+          <Typography variant='body2'>
+            PM2.5: {components.pm2_5.toFixed(1)} μg/m³
+          </Typography>
+          <Typography variant='body2'>
+            PM10: {components.pm10.toFixed(1)} μg/m³
+          </Typography>
+        </Box>
+      </CardContent>
+    </Card>
   );
 };

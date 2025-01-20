@@ -1,214 +1,188 @@
-import { FC, useState } from 'react';
+import { FC, useState, useCallback, useEffect } from 'react';
 import {
-  Box,
   Button,
   Dialog,
-  DialogContent,
   DialogTitle,
-  useMediaQuery,
-  useTheme,
-  CircularProgress,
+  DialogContent,
+  DialogActions,
+  IconButton,
+  Box,
   Autocomplete,
   TextField,
-  Snackbar,
-  Alert,
+  CircularProgress,
 } from '@mui/material';
-import { Add } from '@mui/icons-material';
-import { useWeatherWebSocket } from '../hooks/useWeatherWebSocket';
+import { Add as AddIcon } from '@mui/icons-material';
+import { useAppDispatch } from '../store/hooks';
+import { addLocationThunk } from '../store/features/weatherSlice';
+import { showSnackbar } from '../store/features/uiSlice';
 import { useTranslation } from 'react-i18next';
-import { useRetry } from '../hooks/useRetry';
 
-interface GeocodingResult {
+interface City {
   name: string;
   lat: number;
   lon: number;
   country: string;
-  state?: string;
 }
 
-const SnackbarAlert = ({
-  open,
-  onClose,
-  severity,
-  message,
-}: {
-  open: boolean;
-  onClose: () => void;
-  severity: 'success' | 'warning';
-  message: string;
-}) => (
-  <Snackbar
-    open={open}
-    autoHideDuration={3000}
-    onClose={onClose}
-    anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-  >
-    <Alert onClose={onClose} severity={severity} sx={{ width: '100%' }}>
-      {message}
-    </Alert>
-  </Snackbar>
-);
-
 export const WeatherAddCityDialog: FC = () => {
-  const [openDialog, setOpenDialog] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isSearching, setIsSearching] = useState(false);
-  const [options, setOptions] = useState<GeocodingResult[]>([]);
-  const [showError, setShowError] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const { addWeatherLocation, locations } = useWeatherWebSocket();
+  const [open, setOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<City[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+
+  const dispatch = useAppDispatch();
   const { t } = useTranslation();
-  const { executeWithRetry } = useRetry();
 
-  const theme = useTheme();
-  const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQuery(searchQuery);
+    }, 500);
 
-  const handleDialogOpen = () => {
-    setOpenDialog(true);
-  };
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [searchQuery]);
 
-  const handleDialogClose = () => {
-    setOpenDialog(false);
-    setSearchTerm('');
-    setOptions([]);
-  };
-
-  const searchCities = async (input: string) => {
-    if (!input.trim() || input.length < 2) return;
-
-    setIsSearching(true);
-    try {
-      const response = (await executeWithRetry(() =>
-        fetch(
-          `https://api.openweathermap.org/geo/1.0/direct?q=${input}&limit=5&appid=${import.meta.env.VITE_OPENWEATHER_API_KEY}`
-        )
-      )) as Response;
-      const data = (await response.json()) as GeocodingResult[];
-      setOptions(data);
-    } catch (error) {
-      console.error('Error searching for city:', error);
-      setOptions([]);
-    } finally {
-      setIsSearching(false);
+  useEffect(() => {
+    if (debouncedQuery) {
+      handleSearch(debouncedQuery);
     }
+  }, [debouncedQuery]);
+
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => {
+    setOpen(false);
+    setSearchQuery('');
+    setSearchResults([]);
+    setError(null);
   };
 
-  const handleInputChange = (_event: any, newValue: string) => {
-    setSearchTerm(newValue);
-    if (newValue) {
-      searchCities(newValue);
-    } else {
-      setOptions([]);
-    }
-  };
-
-  const handleSelect = (_event: any, value: GeocodingResult | null) => {
-    if (value) {
-      const locationKey = `${value.lat}:${value.lon}`;
-      if (locations.includes(locationKey)) {
-        setShowError(true);
-        setSearchTerm('');
-        setOptions([]);
-      } else {
-        addWeatherLocation(locationKey);
-        setShowSuccess(true);
-        handleDialogClose();
+  const handleSearch = useCallback(
+    async (query: string) => {
+      if (!query.trim()) {
+        setSearchResults([]);
+        return;
       }
+
+      setLoading(true);
+      setError(null);
+
+      try {
+        const response = await fetch(
+          `https://api.openweathermap.org/geo/1.0/direct?q=${query}&limit=5&appid=${import.meta.env.VITE_OPENWEATHER_API_KEY}`
+        );
+
+        if (!response.ok) {
+          throw new Error(t('addCity.searchError'));
+        }
+
+        const data = await response.json();
+        setSearchResults(data);
+      } catch (err) {
+        setError(t('addCity.searchError'));
+        setSearchResults([]);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [t]
+  );
+
+  const handleAddCity = async (city: City) => {
+    try {
+      await dispatch(
+        addLocationThunk({ lat: city.lat, lon: city.lon })
+      ).unwrap();
+      dispatch(
+        showSnackbar({
+          message: t('addCity.successfullyAdded'),
+          severity: 'success',
+        })
+      );
+      handleClose();
+    } catch (error) {
+      setError(t('addCity.alreadyAdded'));
+      dispatch(
+        showSnackbar({
+          message: t('addCity.alreadyAdded'),
+          severity: 'error',
+        })
+      );
     }
   };
 
   return (
     <>
-      <Button
-        variant='outlined'
-        onClick={handleDialogOpen}
-        startIcon={<Add />}
-        sx={{ width: '200px', ml: 2 }}
-        disableRipple
+      <IconButton
+        color='primary'
+        onClick={handleOpen}
+        sx={{ position: 'fixed', right: 20, bottom: 20 }}
       >
-        {t('addCity.button')}
-      </Button>
-      <Dialog
-        fullScreen={fullScreen}
-        open={openDialog}
-        onClose={handleDialogClose}
-        aria-labelledby='add-city-dialog-title'
-        keepMounted={false}
-        maxWidth='sm'
-        PaperProps={{
-          sx: {
-            width: '100%',
-            m: 2,
-          },
-        }}
-      >
-        <DialogTitle id='add-city-dialog-title'>
-          {t('addCity.title')}
-        </DialogTitle>
+        <AddIcon />
+      </IconButton>
+
+      <Dialog open={open} onClose={handleClose} maxWidth='sm' fullWidth>
+        <DialogTitle>{t('addCity.title')}</DialogTitle>
         <DialogContent>
-          <Box sx={{ mt: 2 }}>
+          <Box sx={{ display: 'flex', gap: 1, my: 2 }}>
             <Autocomplete
               fullWidth
-              autoComplete
-              includeInputInList
-              filterSelectedOptions
-              loading={isSearching}
-              options={options}
-              value={null}
-              inputValue={searchTerm}
-              onInputChange={handleInputChange}
-              onChange={handleSelect}
+              freeSolo
+              options={searchResults}
               getOptionLabel={(option) =>
-                `${option.name}${option.state ? `, ${option.state}` : ''}, ${option.country}`
+                typeof option === 'string'
+                  ? option
+                  : `${option.name}, ${option.country}`
               }
-              isOptionEqualToValue={(option, value) =>
-                option.lat === value.lat && option.lon === value.lon
+              filterOptions={(x) => x}
+              loading={loading}
+              loadingText={t('addCity.searching')}
+              noOptionsText={
+                searchQuery
+                  ? t('addCity.noResults')
+                  : t('addCity.searchPlaceholder')
               }
               renderOption={(props, option) => (
-                <li
-                  {...props}
-                  key={`${option.name}-${option.country}-${option.lat}-${option.lon}`}
-                >
-                  {`${option.name}${option.state ? `, ${option.state}` : ''}, ${option.country}`}
+                <li {...props} key={props.id}>
+                  {`${option.name}, ${option.country}`}
                 </li>
               )}
+              onInputChange={(_, newValue) => {
+                setSearchQuery(newValue);
+              }}
+              onChange={(_, newValue) => {
+                if (newValue && typeof newValue !== 'string') {
+                  handleAddCity(newValue);
+                }
+              }}
               renderInput={(params) => (
                 <TextField
                   {...params}
                   label={t('addCity.searchPlaceholder')}
-                  variant='outlined'
+                  error={!!error}
+                  helperText={error}
                   InputProps={{
                     ...params.InputProps,
                     endAdornment: (
                       <>
-                        {isSearching && (
+                        {loading ? (
                           <CircularProgress color='inherit' size={20} />
-                        )}
+                        ) : null}
                         {params.InputProps.endAdornment}
                       </>
                     ),
                   }}
-                  autoFocus
                 />
               )}
-              noOptionsText={t('addCity.noResults')}
-              loadingText={t('addCity.searching')}
             />
           </Box>
         </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose}>{t('common.cancel')}</Button>
+        </DialogActions>
       </Dialog>
-      <SnackbarAlert
-        open={showError}
-        onClose={() => setShowError(false)}
-        severity='warning'
-        message={t('addCity.alreadyAdded')}
-      />
-      <SnackbarAlert
-        open={showSuccess}
-        onClose={() => setShowSuccess(false)}
-        severity='success'
-        message={t('addCity.successfullyAdded')}
-      />
     </>
   );
 };

@@ -1,18 +1,19 @@
-import { lazy, Suspense } from "react";
-import { createBrowserRouter, Navigate } from "react-router-dom";
-import { CircularProgress, Box } from "@mui/material";
-import { DashboardLayout } from "./layout/DashboardLayout";
-import { ErrorBoundary } from "./components/ErrorBoundary";
+import { lazy, Suspense } from 'react';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { CircularProgress, Box } from '@mui/material';
+import { DashboardLayout } from './layout/DashboardLayout';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { AuthGuard } from './components/AuthGuard';
 
-const Dashboard = lazy(() => import("./pages/Dashboard"));
-const LocationOverview = lazy(() => import("./pages/LocationOverview"));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const LocationOverview = lazy(() => import('./pages/LocationOverview'));
 
 const LoadingFallback = () => (
   <Box
-    display="flex"
-    justifyContent="center"
-    alignItems="center"
-    minHeight="100vh"
+    display='flex'
+    justifyContent='center'
+    alignItems='center'
+    minHeight='100vh'
   >
     <CircularProgress />
   </Box>
@@ -20,7 +21,7 @@ const LoadingFallback = () => (
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: '/',
     element: <DashboardLayout />,
     errorElement: (
       <ErrorBoundary>
@@ -29,27 +30,31 @@ const router = createBrowserRouter([
     ),
     children: [
       {
-        path: "/",
-        element: <Navigate to="/dashboard" replace />,
+        path: '/',
+        element: <Navigate to='/dashboard' replace />,
       },
       {
-        path: "/dashboard",
+        path: '/dashboard',
         element: (
-          <Suspense fallback={<LoadingFallback />}>
-            <Dashboard />
-          </Suspense>
+          <AuthGuard>
+            <Suspense fallback={<LoadingFallback />}>
+              <Dashboard />
+            </Suspense>
+          </AuthGuard>
         ),
       },
       {
-        path: "/location",
-        element: <Navigate to="/dashboard" replace />,
+        path: '/location',
+        element: <Navigate to='/dashboard' replace />,
       },
       {
-        path: "/location/:locationId",
+        path: '/location/:locationId',
         element: (
-          <Suspense fallback={<LoadingFallback />}>
-            <LocationOverview />
-          </Suspense>
+          <AuthGuard>
+            <Suspense fallback={<LoadingFallback />}>
+              <LocationOverview />
+            </Suspense>
+          </AuthGuard>
         ),
       },
     ],

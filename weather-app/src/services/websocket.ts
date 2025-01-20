@@ -29,7 +29,6 @@ class WebSocketService {
         setConnectionStatus(WebSocketConnectionStatus.DISCONNECTED)
       );
       console.info('WebSocket disconnected');
-      // Attempt to reconnect after 5 seconds
       setTimeout(() => this.connect(), 5000);
     };
 

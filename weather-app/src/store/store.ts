@@ -1,27 +1,14 @@
-import { configureStore } from "@reduxjs/toolkit";
-import weatherReducer, { initialState } from "./features/weatherSlice";
-import { loadState, saveState } from "./localStorage";
-
-const preloadedState = loadState();
+import { configureStore } from '@reduxjs/toolkit';
+import weatherReducer from './features/weatherSlice';
+import authReducer from './features/authSlice';
+import uiReducer from './features/uiSlice';
 
 export const store = configureStore({
   reducer: {
     weather: weatherReducer,
+    auth: authReducer,
+    ui: uiReducer,
   },
-  preloadedState: preloadedState
-    ? {
-        weather: {
-          ...initialState,
-          savedLocations: preloadedState.savedLocations,
-        },
-      }
-    : undefined,
-});
-
-store.subscribe(() => {
-  saveState({
-    savedLocations: store.getState().weather.savedLocations,
-  });
 });
 
 export type RootState = ReturnType<typeof store.getState>;

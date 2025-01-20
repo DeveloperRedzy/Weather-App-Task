@@ -1,9 +1,9 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { webSocketService } from '../services/websocket';
 import {
-  addLocation,
-  removeLocation,
+  addLocationThunk,
+  removeLocationThunk,
   setSelectedLocation,
 } from '../store/features/weatherSlice';
 
@@ -19,37 +19,42 @@ export const useWeatherWebSocket = () => {
     (state) => state.weather.connectionStatus
   );
 
-  // Connect to WebSocket on mount
+  const isConnected = useRef(false);
+
   useEffect(() => {
-    webSocketService.connect();
+    if (!isConnected.current) {
+      webSocketService.connect();
+      isConnected.current = true;
+    }
 
     return () => {
       webSocketService.disconnect();
+      isConnected.current = false;
     };
   }, []);
 
-  // Subscribe to saved locations when they change
   useEffect(() => {
-    if (savedLocations.length > 0) {
+    if (savedLocations.length > 0 && connectionStatus === 'connected') {
       webSocketService.subscribeToLocations(savedLocations);
-    } else {
+    } else if (connectionStatus === 'connected') {
       webSocketService.clearSubscriptions();
     }
-  }, [savedLocations]);
+  }, [savedLocations, connectionStatus]);
 
-  // Subscribe to selected location for detailed view
   useEffect(() => {
-    if (selectedLocation) {
+    if (selectedLocation && connectionStatus === 'connected') {
       webSocketService.subscribeToLocation(selectedLocation);
     }
-  }, [selectedLocation]);
+  }, [selectedLocation, connectionStatus]);
 
   const addWeatherLocation = (location: string) => {
-    dispatch(addLocation(location));
+    const [lat, lon] = location.split(':').map(Number);
+    dispatch(addLocationThunk({ lat, lon }));
   };
 
   const removeWeatherLocation = (location: string) => {
-    dispatch(removeLocation(location));
+    const [lat, lon] = location.split(':').map(Number);
+    dispatch(removeLocationThunk({ lat, lon }));
   };
 
   const selectLocation = (location: string | null) => {

@@ -1,6 +1,6 @@
-import { Component, ReactNode } from "react";
-import { Box, Button, Typography } from "@mui/material";
-import { withTranslation, WithTranslation } from "react-i18next";
+import { Component, ReactNode } from 'react';
+import { Box, Button, Typography } from '@mui/material';
+import { withTranslation, WithTranslation } from 'react-i18next';
 
 interface Props extends WithTranslation {
   children: ReactNode;
@@ -27,7 +27,7 @@ class ErrorBoundaryComponent extends Component<Props, State> {
   };
 
   private handleGoHome = () => {
-    window.location.href = "/dashboard";
+    window.location.href = '/dashboard';
   };
 
   public render() {
@@ -36,35 +36,35 @@ class ErrorBoundaryComponent extends Component<Props, State> {
     if (this.state.hasError) {
       return (
         <Box
-          display="flex"
-          flexDirection="column"
-          alignItems="center"
-          justifyContent="center"
-          minHeight="100vh"
+          display='flex'
+          flexDirection='column'
+          alignItems='center'
+          justifyContent='center'
+          minHeight='100vh'
           p={3}
-          textAlign="center"
+          textAlign='center'
         >
-          <Typography variant="h4" gutterBottom>
-            {t("error.title")}
+          <Typography variant='h4' gutterBottom>
+            {t('error.title')}
           </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-            {this.state.error?.message || t("error.message")}
+          <Typography variant='body1' color='text.secondary' sx={{ mb: 3 }}>
+            {this.state.error?.message || t('error.message')}
           </Typography>
           <Box>
             <Button
-              variant="contained"
-              color="primary"
+              variant='contained'
+              color='primary'
               onClick={this.handleRetry}
               sx={{ mr: 2 }}
             >
-              {t("error.tryAgain")}
+              {t('error.tryAgain')}
             </Button>
             <Button
-              variant="outlined"
-              color="primary"
+              variant='outlined'
+              color='primary'
               onClick={this.handleGoHome}
             >
-              {t("error.goToDashboard")}
+              {t('error.goToDashboard')}
             </Button>
           </Box>
         </Box>

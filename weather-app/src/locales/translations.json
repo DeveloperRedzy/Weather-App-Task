@@ -4,6 +4,13 @@
       "welcome": "Welcome",
       "language": "Language",
       "search": "Filter city",
+      "common": {
+        "cancel": "Cancel"
+      },
+      "city": {
+        "successfullyDeleted": "City successfully deleted",
+        "deleteFailed": "Failed to delete city"
+      },
       "currentWeather": {
         "title": "Current Weather",
         "feelsLike": "Feels like"
@@ -67,6 +74,13 @@
       "welcome": "Dobrodošli",
       "language": "Jezik",
       "search": "Filtriraj mesto",
+      "common": {
+        "cancel": "Prekliči"
+      },
+      "city": {
+        "successfullyDeleted": "Mesto je uspešno izbrisano",
+        "deleteFailed": "Brisanje mesta ni uspelo"
+      },
       "currentWeather": {
         "title": "Trenutno vreme",
         "feelsLike": "Občutek"
