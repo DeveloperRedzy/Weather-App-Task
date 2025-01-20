@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import * as api from '../../services/api';
-import { WeatherData, ForecastData, AirQualityData } from '../../types/weather';
+import { WeatherData, ForecastData, AirQualityData } from '@/types/weather.ts';
 
 export enum WebSocketConnectionStatus {
   CONNECTED = 'connected',

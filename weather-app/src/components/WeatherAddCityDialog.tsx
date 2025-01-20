@@ -12,7 +12,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
-import { useAppDispatch } from '../store/hooks';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { addLocationThunk } from '../store/features/weatherSlice';
 import { showSnackbar } from '../store/features/uiSlice';
 import { useTranslation } from 'react-i18next';
@@ -34,6 +34,9 @@ export const WeatherAddCityDialog: FC = () => {
 
   const dispatch = useAppDispatch();
   const { t } = useTranslation();
+  const savedLocations = useAppSelector(
+    (state) => state.weather.savedLocations
+  );
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -91,6 +94,17 @@ export const WeatherAddCityDialog: FC = () => {
   );
 
   const handleAddCity = async (city: City) => {
+    const cityLocationString = `${city.lat}:${city.lon}`;
+    if (savedLocations.includes(cityLocationString)) {
+      dispatch(
+        showSnackbar({
+          message: t('addCity.alreadyAdded'),
+          severity: 'error',
+        })
+      );
+      return;
+    }
+
     try {
       await dispatch(
         addLocationThunk({ lat: city.lat, lon: city.lon })
@@ -103,10 +117,9 @@ export const WeatherAddCityDialog: FC = () => {
       );
       handleClose();
     } catch (error) {
-      setError(t('addCity.alreadyAdded'));
       dispatch(
         showSnackbar({
-          message: t('addCity.alreadyAdded'),
+          message: t('addCity.error'),
           severity: 'error',
         })
       );
